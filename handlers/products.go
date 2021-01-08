@@ -33,11 +33,13 @@ func (p *Products) ServeHTTP(rw http.ResponseWriter, r *http.Request){
 		g := reg.FindAllStringSubmatch(r.URL.Path, -1)
 
 		if len(g) != 1 {
+			p.l.Println("Invalid URL more than one id")
 			jsonWriter.Error(rw, "Invalid URL", http.StatusRequestURITooLong)
 			return
 		}
 
-		if len(g[0]) != 1 {
+		if len(g[0]) != 2 {
+			p.l.Println("Invalid URL more than one capture group")
 			jsonWriter.Error(rw, "Invalid URL", http.StatusBadRequest)
 			return
 		}
@@ -45,10 +47,13 @@ func (p *Products) ServeHTTP(rw http.ResponseWriter, r *http.Request){
 		idString := g[0][1]
 		id, err := strconv.Atoi(idString)
 		if err != nil {
+			p.l.Println("Invalid URL unable to convert to number")
 			jsonWriter.Error(rw, "Invalid URL", http.StatusBadRequest)
 			return
 		}
-		p.l.Println(id, " received")
+		//p.l.Println(id, " received")
+
+		p.updateProduct(id, rw, r)
 
 	}
 
@@ -72,4 +77,16 @@ func (p *Products) addProduct(rw http.ResponseWriter, r * http.Request){
 		return
 	}
 	data.AddProduct(prod)
+}
+
+func (p *Products) updateProduct(id int, rw http.ResponseWriter, r *http.Request){
+	prod := &data.Product{}
+
+	err := prod.FromJson(r.Body)
+	if err != nil {
+		jsonWriter.Error(rw, "Unable to Unmarshal Json", http.StatusBadRequest)
+		return
+	}
+
+	err = data.UpdateProduct(id, prod)
 }

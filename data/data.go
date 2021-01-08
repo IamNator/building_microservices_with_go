@@ -2,6 +2,7 @@ package data
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"time"
 )
@@ -28,6 +29,25 @@ func GetProduct() Products {
 func AddProduct(p *Product){
 	p.ID = nextProductID()
 	productList = append(productList, p)
+}
+
+func UpdateProduct(id int, prod * Product) error {
+	p, err := findProduct(id)
+	if err == ErrProductNotFound {
+		return err
+	}
+	productList[p] = prod
+	return nil
+}
+var ErrProductNotFound = fmt.Errorf("product not found")
+
+func findProduct(id int) (productIndex int, err error){
+	for productIndex, p := range productList {
+		if p.ID == id {
+			return productIndex, nil
+		}
+	}
+	return -1, ErrProductNotFound
 }
 
 //gets next product id
