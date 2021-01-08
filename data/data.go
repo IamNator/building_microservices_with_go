@@ -23,7 +23,13 @@ func GetProduct() Products {
 	return productList
 }
 
+// FromJson deserialize the contents of the json
+func (p *Product) FromJson(r io.Reader) error {
+	e := json.NewDecoder(r)
+	return e.Decode(p)
+}
 
+// ToJson serialize the contents of the collection to json
 func (p *Products) ToJson(w io.Writer) error {
 	e := json.NewEncoder(w)
 	return e.Encode(p)
