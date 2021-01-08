@@ -5,6 +5,8 @@ import (
 	"github.com/IamNator/building_microservices_with_go/data"
 	"log"
 	"net/http"
+	"regexp"
+	"strconv"
 )
 
 type Products struct {
@@ -26,10 +28,34 @@ func (p *Products) ServeHTTP(rw http.ResponseWriter, r *http.Request){
 		return
 	}
 
+	if r.Method == http.MethodPut {
+		reg := regexp.MustCompile(`/([0-9]+)`)
+		g := reg.FindAllStringSubmatch(r.URL.Path, -1)
+
+		if len(g) != 1 {
+			jsonWriter.Error(rw, "Invalid URL", http.StatusRequestURITooLong)
+			return
+		}
+
+		if len(g[0]) != 1 {
+			jsonWriter.Error(rw, "Invalid URL", http.StatusBadRequest)
+			return
+		}
+
+		idString := g[0][1]
+		id, err := strconv.Atoi(idString)
+		if err != nil {
+			jsonWriter.Error(rw, "Invalid URL", http.StatusBadRequest)
+			return
+		}
+		p.l.Println(id, " received")
+
+	}
+
 	rw.WriteHeader(http.StatusMethodNotAllowed)
 }
 
-func (p *Products) getProduct(rw http.ResponseWriter, r *http.Request){
+func (p *Products) getProduct(rw http.ResponseWriter, _ *http.Request){
 	lp := data.GetProduct()
 	err := lp.ToJson(rw)
 	if err!=nil {
