@@ -19,8 +19,22 @@ type Product struct {
 
 type Products []*Product
 
+//returns an array of products
 func GetProduct() Products {
 	return productList
+}
+
+//adds products to productList
+func AddProduct(p *Product){
+	p.ID = nextProductID()
+	productList = append(productList, p)
+}
+
+//gets next product id
+func nextProductID() int{
+	p := productList[len(productList) - 1]
+	id := p.ID + 1
+	return id
 }
 
 // FromJson deserialize the contents of the json
