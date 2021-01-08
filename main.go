@@ -17,6 +17,7 @@ func main(){
 
 	ph := handlers.NewProduct(l)
 
+
 	sm := http.NewServeMux()
 	sm.Handle("/", ph)
 
